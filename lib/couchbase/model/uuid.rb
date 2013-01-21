@@ -100,7 +100,11 @@ module Couchbase
       def ensure_global_key_initialized
         #FIXME: this shouldn't be 1, should be itemCount/docCount
         #see how we can use http://stackoverflow.com/questions/11621646/get-bucket-item-count-in-couchbase
-        cnn.get(seq_k) || cnn.set(seq_k, 1)
+        begin
+          cnn.get(seq_k)
+        rescue Couchbase::Error::NotFound => e
+          cnn.set(seq_k, 1)
+        end
       end
 
       def seq_k; @seq_k ||= 'gid::increment'; end
