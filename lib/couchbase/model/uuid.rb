@@ -82,7 +82,7 @@ module Couchbase
                 when :sequential
                   (1..count).map{ next_seq }
                 when :couchbase_increment
-                  k_incr
+                  "%09d" % k_incr
                 else
                   raise ArgumentError, "Unknown algorithm #{algo}. Should be one :sequential, :random or :utc_random"
                 end
@@ -92,7 +92,7 @@ module Couchbase
       private
       def k_incr
         ensure_global_key_initialized
-        cnn.incr(seq_k).to_s
+        cnn.incr(seq_k)
       end
 
       def cnn; Couchbase.bucket; end
