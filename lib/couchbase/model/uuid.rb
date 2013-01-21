@@ -81,6 +81,8 @@ module Couchbase
                   end
                 when :sequential
                   (1..count).map{ next_seq }
+                when :couchbase_increment
+                  k_incr
                 else
                   raise ArgumentError, "Unknown algorithm #{algo}. Should be one :sequential, :random or :utc_random"
                 end
@@ -88,6 +90,20 @@ module Couchbase
       end
 
       private
+      def k_incr
+        ensure_global_key_initialized
+        cnn.incr(seq_k)
+      end
+
+      def cnn; Couchbase.bucket; end
+
+      def ensure_global_key_initialized
+        #FIXME: this shouldn't be 1, should be itemCount/docCount
+        #see how we can use http://stackoverflow.com/questions/11621646/get-bucket-item-count-in-couchbase
+        cnn.get(seq_k) || cnn.set(seq_k, 1)
+      end
+
+      def seq_k; @seq_k ||= 'gid::increment'; end
 
       def next_seq
         @lock.synchronize do
