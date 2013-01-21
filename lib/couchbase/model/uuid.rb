@@ -92,7 +92,7 @@ module Couchbase
       private
       def k_incr
         ensure_global_key_initialized
-        cnn.incr(seq_k)
+        cnn.incr(seq_k).to_s
       end
 
       def cnn; Couchbase.bucket; end
